@@ -1,7 +1,10 @@
-import type { NextConfig } from "next";
+import { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  reactStrictMode: true,
+  images: {
+    domains: ['laravelnews.s3.amazonaws.com'], // هنا تحط أي دومين هتجيب منه صور
+  },
 };
 
 export default nextConfig;

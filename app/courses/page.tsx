@@ -1,9 +1,12 @@
-// app/courses/page.tsx (Server Component)
-import  prisma  from "@/lib/prisma"; // Adjust path to your Prisma client
+// app/courses/page.tsx (Server Component with Streaming)
+import { Suspense } from 'react';
+import prisma from "@/lib/prisma";
 import CoursesClient from "./CoursesClient";
+import CoursesHero from "./CoursesHero";
+import CoursesSkeleton from "./CoursesSkeleton";
 
-export default async function CoursesPage() {
-  // Fetch courses with related data from database
+// This fetches courses (will be streamed)
+async function CoursesList() {
   const courses = await prisma.course.findMany({
     where: {
       isPublished: true,
@@ -12,16 +15,24 @@ export default async function CoursesPage() {
       instructor: {
         select: {
           name: true,
+          image: true,
         },
       },
       category: {
         select: {
           name: true,
+          slug: true,
         },
       },
       _count: {
         select: {
           purchases: true,
+          reviews: true,
+        },
+      },
+      reviews: {
+        select: {
+          rating: true,
         },
       },
     },
@@ -30,13 +41,41 @@ export default async function CoursesPage() {
     },
   });
 
-  // Fetch all categories for the filter
+  // Calculate average rating for each course
+  const coursesWithRatings = courses.map(course => {
+    const avgRating = course.reviews.length > 0
+      ? course.reviews.reduce((sum, review) => sum + review.rating, 0) / course.reviews.length
+      : 0;
+    
+    return {
+      ...course,
+      averageRating: Number(avgRating.toFixed(1)),
+    };
+  });
+
   const categories = await prisma.category.findMany({
     select: {
       name: true,
       slug: true,
     },
+    orderBy: {
+      name: 'asc',
+    },
   });
 
-  return <CoursesClient courses={courses} categories={categories} />;
+  return <CoursesClient courses={coursesWithRatings} categories={categories} />;
+}
+
+export default function CoursesPage() {
+  return (
+    <>
+      {/* Hero loads immediately - no data fetching needed */}
+      <CoursesHero />
+      
+      {/* Courses section with Suspense - streams in when ready */}
+      <Suspense fallback={<CoursesSkeleton />}>
+        <CoursesList />
+      </Suspense>
+    </>
+  );
 }

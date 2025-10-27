@@ -4,10 +4,10 @@ import { ArrowRight, Target, Users, Sparkles, BookOpen, Award, Globe } from "luc
 
 export default function About() {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col min-h-screen bg-white">
       {/* Hero Section */}
       <section className="relative bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="max-w-3xl">
             <div className="text-sm uppercase tracking-widest text-gray-500 mb-6">About Skillify</div>
             <h1 className="text-6xl md:text-7xl font-black leading-none mb-8">
@@ -32,8 +32,8 @@ export default function About() {
                 Built for both sides of learning
               </h2>
               <p className="text-xl text-gray-600 leading-relaxed mb-6">
-                Skillify isn't just another course platform. It's a ecosystem where expert instructors 
-                and ambitious learners connect. Whether you're here to teach or to learn, we've created 
+                Skillify is not just another course platform. It is a ecosystem where expert instructors 
+                and ambitious learners connect. Whether you are here to teach or to learn, we have created 
                 the tools you need to succeed.
               </p>
               <p className="text-xl text-gray-600 leading-relaxed">

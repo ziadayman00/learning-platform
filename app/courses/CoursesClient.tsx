@@ -1,26 +1,33 @@
 // app/courses/CoursesClient.tsx (Client Component)
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useTransition } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Search, Filter, BookOpen, Clock, Star, User } from 'lucide-react';
+import Image from 'next/image';
+import { ArrowRight, Filter, BookOpen, Star, User, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useSearchParams } from 'next/navigation';
 
 type Course = {
   id: string;
   title: string;
   slug: string;
-  description: string | null;
+  description: string;
+  thumbnail: string | null;
   price: number;
   instructor: {
-    name: string | null;
+    name: string;
+    image: string | null;
   };
   category: {
     name: string;
-  };
+    slug: string;
+  } | null;
   _count: {
     purchases: number;
+    reviews: number;
   };
+  averageRating: number;
 };
 
 type Category = {
@@ -34,19 +41,37 @@ type CoursesClientProps = {
 };
 
 export default function CoursesClient({ courses, categories }: CoursesClientProps) {
+  const searchParams = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isFiltering, setIsFiltering] = useState(false);
+
+  // Sync search query from URL params with loading state
+  useEffect(() => {
+    const newSearch = searchParams.get('search') || '';
+    if (newSearch !== searchQuery) {
+      setIsFiltering(true);
+      setSearchQuery(newSearch);
+      
+      // Small delay to show the loading state
+      const timer = setTimeout(() => {
+        setIsFiltering(false);
+      }, 300);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams]);
 
   // Filter courses based on category and search
   const filteredCourses = courses.filter(course => {
-    const matchesCategory = selectedCategory === "All" || course.category.name === selectedCategory;
+    const matchesCategory = selectedCategory === "All" || course.category?.name === selectedCategory;
     const matchesSearch = 
       course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (course.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
+      course.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
-  // Generate gradient colors for thumbnails
+  // Generate gradient colors for thumbnails (fallback if no image)
   const gradients = [
     "bg-gradient-to-br from-blue-500 to-purple-600",
     "bg-gradient-to-br from-pink-500 to-orange-500",
@@ -60,37 +85,7 @@ export default function CoursesClient({ courses, categories }: CoursesClientProp
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      {/* Hero Section */}
-      <section className="relative bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-          <div className="max-w-3xl">
-            <div className="text-sm uppercase tracking-widest text-gray-500 mb-6">
-              Explore Courses
-            </div>
-            <h1 className="text-5xl md:text-7xl font-black leading-none mb-6">
-              Learn anything.
-              <br />
-              Become anyone.
-            </h1>
-            <p className="text-xl text-gray-600 font-light leading-relaxed mb-8">
-              Browse our collection of expert-led courses. Pay once, learn forever.
-            </p>
-            
-            {/* Search Bar */}
-            <div className="relative max-w-2xl">
-              <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search for courses..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-14 pr-6 py-4 bg-gray-50 border-2 border-gray-200 rounded-full text-lg focus:outline-none focus:border-black transition-colors duration-300"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
+      
       {/* Category Filter */}
       <section className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -117,81 +112,120 @@ export default function CoursesClient({ courses, categories }: CoursesClientProp
       <section className="py-16 bg-white flex-grow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold">
-              {filteredCourses.length} {filteredCourses.length === 1 ? 'Course' : 'Courses'}
-            </h2>
+            <div className="flex items-center gap-3">
+              <h2 className="text-2xl font-bold">
+                {filteredCourses.length} {filteredCourses.length === 1 ? 'Course' : 'Courses'}
+              </h2>
+              {isFiltering && (
+                <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+              )}
+            </div>
             <div className="text-sm text-gray-500">
               Showing {selectedCategory === "All" ? "all categories" : selectedCategory}
             </div>
           </div>
 
-          {filteredCourses.length === 0 ? (
-            <div className="text-center py-20">
-              <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">No courses found</h3>
-              <p className="text-gray-600">Try adjusting your filters or search query</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredCourses.map((course, index) => (
-                <Link
-                  key={course.id}
-                  href={`/courses/${course.slug}`}
-                  className="group cursor-pointer bg-white rounded-2xl overflow-hidden border-2 border-gray-200 hover:border-black hover:shadow-2xl hover:-translate-y-2 transition-all duration-500"
-                >
-                  {/* Thumbnail */}
-                  <div className={`h-48 ${gradients[index % gradients.length]} relative overflow-hidden`}>
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-500"></div>
-                    <div className="absolute top-4 left-4">
-                      <span className="bg-white px-4 py-1 rounded-full text-sm font-medium shadow-lg">
-                        {course.category.name}
-                      </span>
-                    </div>
-                    <div className="absolute bottom-4 right-4 bg-white rounded-full p-3 shadow-lg group-hover:scale-110 transition-transform duration-300">
-                      <BookOpen className="w-5 h-5 text-black" />
-                    </div>
-                  </div>
+          {/* Loading overlay */}
+          <div className={`transition-opacity duration-300 ${isFiltering ? 'opacity-50' : 'opacity-100'}`}>
+            {filteredCourses.length === 0 ? (
+              <div className="text-center py-20">
+                <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">No courses found</h3>
+                <p className="text-gray-600">Try adjusting your filters or search query</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {filteredCourses.map((course, index) => (
+                  <Link
+                    key={course.id}
+                    href={`/courses/${course.slug}`}
+                    className="group cursor-pointer bg-white rounded-2xl overflow-hidden border-2 border-gray-200 hover:border-black hover:shadow-2xl hover:-translate-y-2 transition-all duration-500"
+                  >
+                    {/* Thumbnail */}
+<div className="relative h-48 overflow-hidden">
+  {course.thumbnail ? (
+    <Image
+      src={course.thumbnail} // رابط مباشر وصحيح
+      alt={course.title}
+      fill
+      className="object-cover group-hover:scale-110 transition-transform duration-500"
+    />
+  ) : (
+    <div className={`${gradients[index % gradients.length]} w-full h-full`} />
+  )}
+  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-500"></div>
+  {course.category && (
+    <div className="absolute top-4 left-4">
+      <span className="bg-white px-4 py-1 rounded-full text-sm font-medium shadow-lg">
+        {course.category.name}
+      </span>
+    </div>
+  )}
+  <div className="absolute bottom-4 right-4 bg-white rounded-full p-3 shadow-lg group-hover:scale-110 transition-transform duration-300">
+    <BookOpen className="w-5 h-5 text-black" />
+  </div>
+</div>
 
-                  {/* Content */}
-                  <div className="p-6">
-                    <h3 className="text-2xl font-bold mb-2 group-hover:text-gray-600 transition-colors duration-300">
-                      {course.title}
-                    </h3>
-                    <p className="text-gray-600 mb-4 line-clamp-2">
-                      {course.description || "No description available"}
-                    </p>
+                    {/* Content */}
+                    <div className="p-6">
+                      <h3 className="text-2xl font-bold mb-2 group-hover:text-gray-600 transition-colors duration-300 line-clamp-2">
+                        {course.title}
+                      </h3>
+                      <p className="text-gray-600 mb-4 line-clamp-2">
+                        {course.description}
+                      </p>
 
-                    {/* Instructor */}
-                    <div className="flex items-center gap-2 mb-4 text-sm text-gray-600">
-                      <User className="w-4 h-4" />
-                      <span>{course.instructor.name || "Anonymous"}</span>
-                    </div>
-
-                    {/* Stats */}
-                    <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
-                      <div className="flex items-center gap-1">
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="font-medium">4.8</span>
+                      {/* Instructor */}
+                      <div className="flex items-center gap-2 mb-4 text-sm text-gray-600">
+                        {course.instructor.image ? (
+                          <div className="relative w-5 h-5 rounded-full overflow-hidden">
+                            <Image
+                              src={course.instructor.image}
+                              alt={course.instructor.name}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <User className="w-4 h-4" />
+                        )}
+                        <span>{course.instructor.name}</span>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <User className="w-4 h-4" />
-                        <span>{course._count.purchases} students</span>
+
+                      {/* Stats */}
+                      <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
+                        {course.averageRating > 0 ? (
+                          <div className="flex items-center gap-1">
+                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                            <span className="font-medium">{course.averageRating}</span>
+                            <span className="text-gray-400">({course._count.reviews})</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1 text-gray-400">
+                            <Star className="w-4 h-4" />
+                            <span>No reviews yet</span>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-1">
+                          <User className="w-4 h-4" />
+                          <span>{course._count.purchases} students</span>
+                        </div>
+                      </div>
+
+                      {/* Price and CTA */}
+                      <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                        <div className="text-3xl font-black">${course.price}</div>
+                        <Button className="rounded-full font-medium group/btn">
+                          Enroll
+                          <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
+                        </Button>
                       </div>
                     </div>
-
-                    {/* Price and CTA */}
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                      <div className="text-3xl font-black">${course.price}</div>
-                      <Button className="rounded-full font-medium group/btn">
-                        Enroll
-                        <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
-                      </Button>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
