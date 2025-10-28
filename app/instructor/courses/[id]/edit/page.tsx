@@ -7,12 +7,15 @@ import DeleteCourseButton from '@/app/components/forms/DeleteCourseButton';
 import CourseForm from '@/app/components/forms/CourseForm';
 
 type PageProps = {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 };
 
 export default async function EditCoursePage({ params }: PageProps) {
+  // Await params (Next.js 15+)
+  const { id } = await params;
+
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -25,7 +28,7 @@ export default async function EditCoursePage({ params }: PageProps) {
 
   // Fetch the course
   const course = await prisma.course.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       category: {
         select: {
@@ -90,7 +93,7 @@ export default async function EditCoursePage({ params }: PageProps) {
             </div>
             
             {/* Delete Button */}
-            <DeleteCourseButton 
+            <DeleteCourseButton
               courseId={course.id} 
               courseName={course.title}
               hasStudents={course._count.purchases > 0}

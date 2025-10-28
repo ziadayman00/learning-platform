@@ -1,7 +1,7 @@
 // components/forms/CourseForm.tsx
 "use client";
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { createCourse, updateCourse } from '@/app/actions/courses';
-import { Loader2, Save, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Save, Eye } from 'lucide-react';
 
 type Category = {
   id: string;
@@ -35,16 +35,19 @@ type CourseFormProps = {
 
 export default function CourseForm({ categories, mode, course }: CourseFormProps) {
   const router = useRouter();
+  const formRef = useRef<HTMLFormElement>(null);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [isPublished, setIsPublished] = useState(course?.isPublished || false);
+  const [success, setSuccess] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleAction = async (shouldPublish: boolean) => {
+    if (!formRef.current) return;
+    
     setError(null);
+    setSuccess(null);
 
-    const formData = new FormData(e.currentTarget);
-    formData.set('isPublished', isPublished.toString());
+    const formData = new FormData(formRef.current);
+    formData.set('isPublished', shouldPublish.toString());
 
     startTransition(async () => {
       let result;
@@ -58,14 +61,19 @@ export default function CourseForm({ categories, mode, course }: CourseFormProps
       if (result?.error) {
         setError(result.error);
       } else if (result?.success) {
-        router.push('/dashboard?tab=teaching');
-        router.refresh();
+        setSuccess(mode === 'create' ? 'Course created successfully!' : 'Course updated successfully!');
+        
+        // Redirect after a short delay
+        setTimeout(() => {
+          router.push('/dashboard');
+          router.refresh();
+        }, 1000);
       }
     });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-3xl border-2 border-gray-200 p-8 md:p-12">
+    <form ref={formRef} onSubmit={(e) => e.preventDefault()} className="bg-white rounded-3xl border-2 border-gray-200 p-8 md:p-12">
       <div className="space-y-8">
         {/* Title */}
         <div>
@@ -158,9 +166,16 @@ export default function CourseForm({ categories, mode, course }: CourseFormProps
             disabled={isPending}
           />
           <p className="text-sm text-gray-500 mt-2">
-            Paste a URL to an image for your course thumbnail (we'll add upload later)
+            Paste a URL to an image for your course thumbnail
           </p>
         </div>
+
+        {/* Success Message */}
+        {success && (
+          <div className="bg-green-50 border-2 border-green-200 text-green-800 px-6 py-4 rounded-xl">
+            <p className="font-medium">✓ {success}</p>
+          </div>
+        )}
 
         {/* Error Message */}
         {error && (
@@ -182,8 +197,8 @@ export default function CourseForm({ categories, mode, course }: CourseFormProps
           </Button>
           
           <Button
-            type="submit"
-            onClick={() => setIsPublished(false)}
+            type="button"
+            onClick={() => handleAction(false)}
             disabled={isPending}
             variant="outline"
             className="flex-1 rounded-full h-12"
@@ -202,8 +217,8 @@ export default function CourseForm({ categories, mode, course }: CourseFormProps
           </Button>
 
           <Button
-            type="submit"
-            onClick={() => setIsPublished(true)}
+            type="button"
+            onClick={() => handleAction(true)}
             disabled={isPending}
             className="flex-1 rounded-full h-12"
           >
@@ -224,19 +239,16 @@ export default function CourseForm({ categories, mode, course }: CourseFormProps
         {/* Publishing Info */}
         <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-6">
           <div className="flex items-start gap-3">
-            {isPublished ? (
-              <Eye className="w-5 h-5 text-green-600 flex-shrink-0 mt-1" />
-            ) : (
-              <EyeOff className="w-5 h-5 text-gray-400 flex-shrink-0 mt-1" />
-            )}
+            <Eye className="w-5 h-5 text-gray-600 flex-shrink-0 mt-1" />
             <div>
               <h3 className="font-bold mb-1">
-                {isPublished ? 'Published Course' : 'Draft Mode'}
+                Publishing Options
               </h3>
+              <p className="text-sm text-gray-600 mb-2">
+                <strong>Save as Draft:</strong> Work on your course privately. Only you can see it.
+              </p>
               <p className="text-sm text-gray-600">
-                {isPublished
-                  ? 'Your course is live and visible to students on the courses page.'
-                  : 'Save as draft to work on your course before publishing. Drafts are only visible to you.'}
+                <strong>Publish Course:</strong> Make your course live and visible to all students.
               </p>
             </div>
           </div>

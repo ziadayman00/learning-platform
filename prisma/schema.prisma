@@ -25,6 +25,7 @@ model User {
   reviews       Review[]
   accounts      Account[]
   sessions      Session[]
+  lessonProgress LessonProgress[]  // ← Add this line
 
   @@map("users")
 }
@@ -82,12 +83,14 @@ model Course {
 
   purchases Purchase[]
   reviews   Review[]
+  sections  Section[]
 
   @@index([instructorId])
   @@index([categoryId])
   @@index([slug])
   @@map("courses")
 }
+
 
 model Category {
   id          String   @id @default(cuid())
@@ -103,14 +106,15 @@ model Category {
 }
 
 model Purchase {
-  id            String   @id @default(cuid())
-  userId        String
-  courseId      String
-  amount        Float
-  paymentStatus PaymentStatus @default(PENDING)
-  paymentId     String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id              String        @id @default(cuid())
+  userId          String
+  courseId        String
+  amount          Float
+  paymentStatus   PaymentStatus @default(PENDING)
+  paymentId       String?       // Stripe Payment Intent ID
+  stripeSessionId String?       // ADD THIS - Stripe Checkout Session ID
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
@@ -120,6 +124,7 @@ model Purchase {
   @@index([courseId])
   @@map("purchases")
 }
+
 
 model Review {
   id        String   @id @default(cuid())
@@ -136,6 +141,61 @@ model Review {
   @@unique([userId, courseId])
   @@index([courseId])
   @@map("reviews")
+}
+
+model Section {
+  id          String   @id @default(cuid())
+  title       String
+  description String?  @db.Text
+  position    Int      // Order: 1, 2, 3...
+  courseId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  course  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons Lesson[]
+
+  @@index([courseId])
+  @@index([position])
+  @@map("sections")
+}
+
+model Lesson {
+  id          String   @id @default(cuid())
+  title       String
+  description String?  @db.Text
+  videoUrl    String   // URL from video hosting service
+  duration    Int?     // Duration in seconds
+  position    Int      // Order within section: 1, 2, 3...
+  isFree      Boolean  @default(false) // Allow free preview
+  sectionId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  section  Section          @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  progress LessonProgress[]
+
+  @@index([sectionId])
+  @@index([position])
+  @@map("lessons")
+}
+
+model LessonProgress {
+  id           String   @id @default(cuid())
+  userId       String
+  lessonId     String
+  isCompleted  Boolean  @default(false)
+  lastPosition Int      @default(0) // Video playback position in seconds
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+  @@index([userId])
+  @@index([lessonId])
+  @@map("lesson_progress")
 }
 
 enum Role {

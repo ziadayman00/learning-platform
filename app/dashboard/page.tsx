@@ -2,8 +2,8 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
-import DashboardClient from './DashboardClient';
 import prisma from '@/lib/prisma';
+import DashboardClient from './DashboardClient';
 
 export default async function DashboardPage() {
   const session = await auth.api.getSession({
@@ -36,6 +36,15 @@ export default async function DashboardPage() {
               name: true,
             },
           },
+          sections: {
+            include: {
+              lessons: {
+                select: {
+                  id: true,
+                },
+              },
+            },
+          },
           _count: {
             select: {
               reviews: true,
@@ -48,6 +57,47 @@ export default async function DashboardPage() {
       createdAt: 'desc',
     },
   });
+
+  // Transform purchases to include lesson count and completed lessons
+  const purchasesWithProgress = await Promise.all(
+    purchases.map(async (purchase) => {
+      const totalLessons = purchase.course.sections.reduce(
+        (sum, section) => sum + section.lessons.length,
+        0
+      );
+
+      const completedLessons = await prisma.lessonProgress.count({
+        where: {
+          userId: user.id,
+          isCompleted: true,
+          lesson: {
+            section: {
+              courseId: purchase.course.id,
+            },
+          },
+        },
+      });
+
+      return {
+        id: purchase.id,
+        createdAt: purchase.createdAt,
+        course: {
+          id: purchase.course.id,
+          title: purchase.course.title,
+          slug: purchase.course.slug,
+          description: purchase.course.description,
+          thumbnail: purchase.course.thumbnail,
+          instructor: purchase.course.instructor,
+          category: purchase.course.category,
+          _count: {
+            reviews: purchase.course._count.reviews,
+            lessons: totalLessons,
+          },
+        },
+        completedLessons,
+      };
+    })
+  );
 
   // If user is an instructor, fetch their courses
   let instructorCourses = [];
@@ -92,7 +142,7 @@ export default async function DashboardPage() {
         image: user.image || null,
         role: user.role,
       }}
-      purchases={purchases}
+      purchases={purchasesWithProgress}
       instructorCourses={instructorCourses}
       instructorStats={instructorStats}
     />

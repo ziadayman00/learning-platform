@@ -1,6 +1,6 @@
 'use client';
 
-import { Menu, X } from 'lucide-react';
+import { Menu, X, User, Settings, LogOut, ShoppingBag } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,16 +12,34 @@ import {
 } from '@/components/ui/sheet';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useSession, signOut } from '@/lib/auth-client';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@radix-ui/react-dropdown-menu';
 
-export default function MobileMenu() {
+interface MobileMenuProps {
+  isLoggedIn?: boolean;
+}
+
+export default function MobileMenu({ isLoggedIn }: MobileMenuProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const { data: session, isPending } = useSession();
 
-  const links = [
-    { href: '/', label: 'Home' },
-    { href: '/courses', label: 'Courses' },
-    { href: '/about', label: 'About' },
-  ];
+  const user = session?.user;
+
+  // Dynamic links based on login status
+  const links = user
+    ? [
+        { href: '/', label: 'Home' },
+        { href: '/courses', label: 'Courses' },
+        { href: '/about', label: 'About' },
+        { href: '/dashboard', label: 'Dashboard' },
+      ]
+    : [
+        { href: '/', label: 'Home' },
+        { href: '/courses', label: 'Courses' },
+        { href: '/about', label: 'About' },
+      ];
 
   const isActive = (href: string) => {
     if (href === '/') {
@@ -83,25 +101,88 @@ export default function MobileMenu() {
             })}
           </nav>
 
-          {/* Auth Buttons - Pushed to bottom */}
-          <div className="mt-auto px-8 py-8 border-t space-y-3">
-            <Button 
-              variant="outline" 
-              className="w-full h-12 text-base" 
-              asChild
-            >
-              <Link href="/signin" onClick={() => setOpen(false)}>
-                Sign In
-              </Link>
-            </Button>
-            <Button 
-              className="w-full h-12 text-base bg-black hover:bg-gray-800" 
-              asChild
-            >
-              <Link href="/signup" onClick={() => setOpen(false)}>
-                Sign Up
-              </Link>
-            </Button>
+          {/* Auth Section - Pushed to bottom */}
+          <div className="mt-auto px-8 py-8 border-t">
+            {isPending ? (
+              <div className="h-20 bg-gray-100 animate-pulse rounded-lg" />
+            ) : user ? (
+              <div className="space-y-4">
+                {/* User Profile */}
+                <div className="flex items-center gap-3 pb-4">
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage src={user.image || undefined} alt={user.name || ''} />
+                    <AvatarFallback className="bg-black text-white font-medium">
+                      {user.name
+                        ?.split(' ')
+                        .map((n) => n[0])
+                        .join('')
+                        .toUpperCase() || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col min-w-0">
+                    <p className="text-sm font-medium text-black truncate">{user.name}</p>
+                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* User Menu Links */}
+                <div className="space-y-1 pt-2">
+                  <Link
+                    href="/dashboard/purchases"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:text-black hover:bg-gray-50 rounded-lg transition-colors"
+                  >
+                    <ShoppingBag className="h-4 w-4" />
+                    <span>My Courses</span>
+                  </Link>
+                  <Link
+                    href="/settings"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:text-black hover:bg-gray-50 rounded-lg transition-colors"
+                  >
+                    <Settings className="h-4 w-4" />
+                    <span>Settings</span>
+                  </Link>
+                </div>
+
+                <Separator />
+
+                {/* Logout Button */}
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-red-600 hover:text-red-600 hover:bg-red-50"
+                  onClick={() => {
+                    setOpen(false);
+                    signOut();
+                  }}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <Button 
+                  variant="outline" 
+                  className="w-full h-12 text-base" 
+                  asChild
+                >
+                  <Link href="/signin" onClick={() => setOpen(false)}>
+                    Sign In
+                  </Link>
+                </Button>
+                <Button 
+                  className="w-full h-12 text-base bg-black hover:bg-gray-800" 
+                  asChild
+                >
+                  <Link href="/signup" onClick={() => setOpen(false)}>
+                    Sign Up
+                  </Link>
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </SheetContent>

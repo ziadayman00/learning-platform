@@ -10,15 +10,17 @@ interface NavLink {
 
 interface NavLinksProps {
   onClick?: () => void;
+  isLoggedIn?: boolean; // Add this prop
 }
 
-export function NavLinks({ onClick }: NavLinksProps) {
+export function NavLinks({ onClick, isLoggedIn }: NavLinksProps) {
   const pathname = usePathname();
 
   const links: NavLink[] = [
     { href: '/', label: 'Home' },
     { href: '/courses', label: 'Courses' },
     { href: '/about', label: 'About' },
+    ...(isLoggedIn ? [{ href: '/dashboard', label: 'Dashboard' }] : []), // Add dashboard if logged in
   ];
 
   const isActive = (href: string) => {

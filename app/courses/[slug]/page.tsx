@@ -1,21 +1,30 @@
-// app/courses/[slug]/page.tsx (Server Component with Streaming)
-import { Suspense } from 'react';
-import  prisma  from "@/lib/prisma";
+// app/courses/[slug]/page.tsx
 import { notFound } from "next/navigation";
+import prisma from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import CourseDetailClient from "./CourseDetailClient";
-import CourseDetailSkeleton from './CourseDetailSkeleton';
 
-type Props = {
+type PageProps = {
   params: Promise<{
     slug: string;
   }>;
 };
 
-// Separate component for course data fetching
-async function CourseContent({ slug }: { slug: string }) {
+export default async function CourseDetailPage({ params }: PageProps) {
+  const { slug } = await params;
+
+  // Check if user is authenticated
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  const userId = session?.user?.id;
+
+  // Fetch the course
   const course = await prisma.course.findUnique({
     where: {
-      slug: slug,
+      slug,
       isPublished: true,
     },
     include: {
@@ -39,6 +48,20 @@ async function CourseContent({ slug }: { slug: string }) {
           slug: true,
         },
       },
+      sections: {
+        include: {
+          lessons: {
+            orderBy: { position: "asc" },
+          },
+        },
+        orderBy: { position: "asc" },
+      },
+      _count: {
+        select: {
+          purchases: true,
+          reviews: true,
+        },
+      },
       reviews: {
         include: {
           user: {
@@ -49,14 +72,9 @@ async function CourseContent({ slug }: { slug: string }) {
           },
         },
         orderBy: {
-          createdAt: 'desc',
+          createdAt: "desc",
         },
-      },
-      _count: {
-        select: {
-          purchases: true,
-          reviews: true,
-        },
+        take: 10,
       },
     },
   });
@@ -65,19 +83,40 @@ async function CourseContent({ slug }: { slug: string }) {
     notFound();
   }
 
-  // Calculate average rating
-  const averageRating = course.reviews.length > 0
-    ? course.reviews.reduce((sum, review) => sum + review.rating, 0) / course.reviews.length
-    : 0;
+  // Check if user has purchased the course
+  let hasPurchased = false;
+  if (userId) {
+    const purchase = await prisma.purchase.findUnique({
+      where: {
+        userId_courseId: {
+          userId,
+          courseId: course.id,
+        },
+        paymentStatus: "COMPLETED",
+      },
+    });
+    hasPurchased = !!purchase;
+  }
 
-  // Fetch related courses from the same category
-  const relatedCourses = course.categoryId ? await prisma.course.findMany({
+  // Check if user is the instructor
+  const isInstructor = userId === course.instructor.id;
+
+  // Keep all lessons visible, but mark which ones are accessible
+  const filteredSections = course.sections;
+
+  // Calculate average rating
+  const avgRating =
+    course.reviews.length > 0
+      ? course.reviews.reduce((sum, review) => sum + review.rating, 0) /
+        course.reviews.length
+      : 0;
+
+  // Fetch related courses
+  const relatedCourses = await prisma.course.findMany({
     where: {
       categoryId: course.categoryId,
       isPublished: true,
-      NOT: {
-        id: course.id,
-      },
+      id: { not: course.id },
     },
     include: {
       instructor: {
@@ -104,50 +143,37 @@ async function CourseContent({ slug }: { slug: string }) {
       },
     },
     take: 3,
-  }) : [];
+    orderBy: {
+      purchases: {
+        _count: "desc",
+      },
+    },
+  });
 
   // Calculate average ratings for related courses
-  const relatedCoursesWithRatings = relatedCourses.map(relCourse => {
-    const avgRating = relCourse.reviews.length > 0
-      ? relCourse.reviews.reduce((sum, review) => sum + review.rating, 0) / relCourse.reviews.length
-      : 0;
-    
+  const relatedCoursesWithRatings = relatedCourses.map((relatedCourse) => {
+    const avgRating =
+      relatedCourse.reviews.length > 0
+        ? relatedCourse.reviews.reduce((sum, review) => sum + review.rating, 0) /
+          relatedCourse.reviews.length
+        : 0;
+
     return {
-      ...relCourse,
+      ...relatedCourse,
       averageRating: Number(avgRating.toFixed(1)),
     };
   });
 
-  const courseWithRating = {
-    ...course,
-    averageRating: Number(averageRating.toFixed(1)),
-  };
-
-  return <CourseDetailClient course={courseWithRating} relatedCourses={relatedCoursesWithRatings} />;
-}
-
-export default async function CourseDetailPage({ params }: Props) {
-  const { slug } = await params;
-
   return (
-    <Suspense fallback={<CourseDetailSkeleton />}>
-      <CourseContent slug={slug} />
-    </Suspense>
+    <CourseDetailClient
+      course={{
+        ...course,
+        sections: filteredSections,
+        averageRating: Number(avgRating.toFixed(1)),
+      }}
+      relatedCourses={relatedCoursesWithRatings}
+      hasPurchased={hasPurchased}
+      isInstructor={isInstructor}
+    />
   );
-}
-
-// Generate static params for all published courses (for static generation)
-export async function generateStaticParams() {
-  const courses = await prisma.course.findMany({
-    where: {
-      isPublished: true,
-    },
-    select: {
-      slug: true,
-    },
-  });
-
-  return courses.map((course) => ({
-    slug: course.slug,
-  }));
 }
