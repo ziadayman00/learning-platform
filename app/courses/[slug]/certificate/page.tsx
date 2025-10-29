@@ -1,11 +1,11 @@
 // app/courses/[slug]/certificate/page.tsx
-import { redirect, notFound } from 'next/navigation';
-import { auth } from '@/lib/auth';
-import { headers } from 'next/headers';
-import prisma from '@/lib/prisma';
-import CertificateClient from './CertificateClient';
+import { redirect, notFound } from "next/navigation";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import prisma from "@/lib/prisma";
+import CertificateClient from "./CertificateClient";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 type PageProps = {
@@ -23,7 +23,7 @@ export default async function CertificatePage({ params }: PageProps) {
   });
 
   if (!session?.user) {
-    redirect('/signin');
+    redirect("/signin");
   }
 
   const user = session.user;
@@ -52,10 +52,10 @@ export default async function CertificatePage({ params }: PageProps) {
                 },
               },
             },
-            orderBy: { position: 'asc' },
+            orderBy: { position: "asc" },
           },
         },
-        orderBy: { position: 'asc' },
+        orderBy: { position: "asc" },
       },
     },
   });
@@ -71,7 +71,7 @@ export default async function CertificatePage({ params }: PageProps) {
         userId: user.id,
         courseId: course.id,
       },
-      paymentStatus: 'COMPLETED',
+      paymentStatus: "COMPLETED",
     },
   });
 
@@ -83,7 +83,7 @@ export default async function CertificatePage({ params }: PageProps) {
   // 4. Calculate completion
   const allLessons = course.sections.flatMap((s: any) => s.lessons);
   const totalLessons = allLessons.length;
-  
+
   if (totalLessons === 0) {
     console.log(`⚠️ Course has no lessons`);
     redirect(`/courses/${slug}/learn`);
@@ -97,44 +97,51 @@ export default async function CertificatePage({ params }: PageProps) {
   const isCompleted = completionPercentage === 100;
 
   // Debug logging
-  console.log('=== CERTIFICATE ACCESS CHECK ===');
+  console.log("=== CERTIFICATE ACCESS CHECK ===");
   console.log(`Course: ${course.title}`);
   console.log(`User: ${user.name} (${user.id})`);
   console.log(`Total Lessons: ${totalLessons}`);
   console.log(`Completed: ${completedLessons}`);
   console.log(`Percentage: ${completionPercentage.toFixed(1)}%`);
   console.log(`Is Completed: ${isCompleted}`);
-  
-if (process.env.NODE_ENV === 'development') {
-  console.log('Lesson Progress:');
-  allLessons.forEach((lesson: any, idx: number) => {
-    const completed = lesson.progress[0]?.isCompleted;
-    console.log(`  ${idx + 1}. ${lesson.title}: ${completed ? '✅' : '❌'}`);
-  });
-}
-console.log('================================');
 
-// 5. Redirect if not completed
-if (!isCompleted) {
-  console.log(`⚠️ Course not 100% complete (${completionPercentage.toFixed(1)}%), redirecting...`);
-  redirect(`/courses/${slug}/learn`);
-}
+  if (process.env.NODE_ENV === "development") {
+    console.log("Lesson Progress:");
+    allLessons.forEach((lesson: any, idx: number) => {
+      const completed = lesson.progress[0]?.isCompleted;
+      console.log(`  ${idx + 1}. ${lesson.title}: ${completed ? "✅" : "❌"}`);
+    });
+  }
+  console.log("================================");
 
-// 6. Get completion date (most recent lesson completion)
-const completionDates = allLessons
+  // 5. Redirect if not completed
+  if (!isCompleted) {
+    console.log(
+      `⚠️ Course not 100% complete (${completionPercentage.toFixed(
+        1
+      )}%), redirecting...`
+    );
+    redirect(`/courses/${slug}/learn`);
+  }
+
+  // 6. Get completion date (most recent lesson completion)
+  const completionDates = allLessons
   .map((lesson: any) => lesson.progress[0]?.updatedAt)
-  .filter((date): date is Date => date !== undefined);
-  const completionDate = completionDates.length > 0
-    ? new Date(Math.max(...completionDates.map(d => d.getTime())))
-    : new Date();
+  .filter((date: any): date is Date => date !== undefined);
+
+const completionDate = completionDates.length > 0
+  ? new Date(Math.max(...completionDates.map((d: Date) => d.getTime())))
+  : new Date();
 
   // 7. Generate certificate data
   const certificateData = {
-    studentName: user.name || 'Student',
+    studentName: user.name || "Student",
     courseName: course.title,
     instructorName: course.instructor.name,
     completionDate,
-    certificateId: `CERT-${course.id.slice(0, 8).toUpperCase()}-${user.id.slice(0, 8).toUpperCase()}`,
+    certificateId: `CERT-${course.id.slice(0, 8).toUpperCase()}-${user.id
+      .slice(0, 8)
+      .toUpperCase()}`,
   };
 
   return <CertificateClient certificate={certificateData} courseSlug={slug} />;
