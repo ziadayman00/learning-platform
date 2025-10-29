@@ -105,26 +105,25 @@ export default async function CertificatePage({ params }: PageProps) {
   console.log(`Percentage: ${completionPercentage.toFixed(1)}%`);
   console.log(`Is Completed: ${isCompleted}`);
   
-  if (process.env.NODE_ENV === 'development') {
-    console.log('Lesson Progress:');
-    allLessons.forEach((lesson, idx) => {
-      const completed = lesson.progress[0]?.isCompleted;
-      console.log(`  ${idx + 1}. ${lesson.title}: ${completed ? '✅' : '❌'}`);
-    });
-  }
-  console.log('================================');
+if (process.env.NODE_ENV === 'development') {
+  console.log('Lesson Progress:');
+  allLessons.forEach((lesson: any, idx: number) => {
+    const completed = lesson.progress[0]?.isCompleted;
+    console.log(`  ${idx + 1}. ${lesson.title}: ${completed ? '✅' : '❌'}`);
+  });
+}
+console.log('================================');
 
-  // 5. Redirect if not completed
-  if (!isCompleted) {
-    console.log(`⚠️ Course not 100% complete (${completionPercentage.toFixed(1)}%), redirecting...`);
-    redirect(`/courses/${slug}/learn`);
-  }
+// 5. Redirect if not completed
+if (!isCompleted) {
+  console.log(`⚠️ Course not 100% complete (${completionPercentage.toFixed(1)}%), redirecting...`);
+  redirect(`/courses/${slug}/learn`);
+}
 
-  // 6. Get completion date (most recent lesson completion)
-  const completionDates = allLessons
-    .map(lesson => lesson.progress[0]?.updatedAt)
-    .filter((date): date is Date => date !== undefined);
-
+// 6. Get completion date (most recent lesson completion)
+const completionDates = allLessons
+  .map((lesson: any) => lesson.progress[0]?.updatedAt)
+  .filter((date): date is Date => date !== undefined);
   const completionDate = completionDates.length > 0
     ? new Date(Math.max(...completionDates.map(d => d.getTime())))
     : new Date();
