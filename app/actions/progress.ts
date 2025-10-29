@@ -136,10 +136,10 @@ export async function getCourseProgress(courseId: string) {
     }
 
     const totalLessons = course.sections.reduce(
-      (sum: number, section) => sum + section.lessons.length,
+      (sum: number, section: any) => sum + section.lessons.length,
       0
     );
-
+    
     // Get completed lessons
     const completedLessons = await prisma.lessonProgress.count({
       where: {
@@ -153,7 +153,8 @@ export async function getCourseProgress(courseId: string) {
       },
     });
 
-    const progress = totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0;
+    const progress =
+      totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0;
 
     return {
       success: true,
