@@ -163,7 +163,7 @@ export default function LearningCourseSidebar({
               {/* Enhanced Lessons List */}
               {isOpen && (
                 <div className="bg-gray-50">
-                  {section.lessons.map((lesson: any, lessonIndex) => {
+                  {section.lessons.map((lesson: any, lessonIndex: any) => {
                     const isCompleted = progressMap[lesson.id]?.isCompleted || false;
                     const isCurrent = lesson.id === currentLessonId;
 
