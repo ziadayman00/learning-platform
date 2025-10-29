@@ -47,7 +47,7 @@ async function CoursesList() {
   // Calculate average rating for each course
   const coursesWithRatings = courses.map(course => {
     const avgRating = course.reviews.length > 0
-      ? course.reviews.reduce((sum: number, review) => sum + review.rating, 0) / course.reviews.length
+      ? course.reviews.reduce((sum: number, review: any) => sum + review.rating, 0) / course.reviews.length
       : 0;
     
     return {
