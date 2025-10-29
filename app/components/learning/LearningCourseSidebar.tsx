@@ -93,7 +93,7 @@ export default function LearningCourseSidebar({
 
       {/* Sections Content */}
       <div className="flex-1 overflow-y-auto">
-        {sections.map((section, sectionIndex) => {
+        {sections.map((section: any, sectionIndex) => {
           const isOpen = openSections.includes(section.id);
           const completedInSection = section.lessons.filter(
             (l) => progressMap[l.id]?.isCompleted
@@ -163,7 +163,7 @@ export default function LearningCourseSidebar({
               {/* Enhanced Lessons List */}
               {isOpen && (
                 <div className="bg-gray-50">
-                  {section.lessons.map((lesson, lessonIndex) => {
+                  {section.lessons.map((lesson: any, lessonIndex) => {
                     const isCompleted = progressMap[lesson.id]?.isCompleted || false;
                     const isCurrent = lesson.id === currentLessonId;
 

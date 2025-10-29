@@ -128,7 +128,7 @@ function CurriculumSections({
 
   return (
     <div className="space-y-4">
-      {sections.map((section, sectionIndex) => {
+      {sections.map((section: any, sectionIndex) => {
         const isOpen = openSections.includes(section.id);
 
         return (
@@ -288,7 +288,7 @@ const totalLessons = course.sections.reduce(
 );
 
 const freeLessons = course.sections.reduce(
-  (sum: number, section) => sum + section.lessons.filter((l) => l.isFree).length,
+  (sum: number, section) => sum + section.lessons.filter((l: any) => l.isFree).length,
   0
 );
 

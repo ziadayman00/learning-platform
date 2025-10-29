@@ -128,7 +128,7 @@ export default function SectionCard({ section, sectionNumber, courseId }: Sectio
             </div>
           ) : (
             <>
-              {section.lessons.map((lesson, index) => (
+              {section.lessons.map((lesson: any, index) => (
                 <div
                   key={lesson.id}
                   className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-200 hover:bg-gray-100 transition-colors group"

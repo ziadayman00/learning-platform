@@ -93,7 +93,7 @@ export default async function CourseLearningPage({ params, searchParams }: PageP
   });
 
   // Convert to map for easy lookup
-  const progressMap = progressRecords.reduce((acc, record) => {
+  const progressMap = progressRecords.reduce((acc: any, record: any) => {
     acc[record.lessonId] = {
       isCompleted: record.isCompleted,
       lastPosition: record.lastPosition,
@@ -122,7 +122,7 @@ export default async function CourseLearningPage({ params, searchParams }: PageP
   if (lessonId) {
     // Find the specific lesson
     for (const section of course.sections) {
-      const lesson = section.lessons.find((l) => l.id === lessonId);
+      const lesson = section.lessons.find((l: any) => l.id === lessonId);
       if (lesson) {
         currentLesson = lesson;
         currentSectionId = section.id;

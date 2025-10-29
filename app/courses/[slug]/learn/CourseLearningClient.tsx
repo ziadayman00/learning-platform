@@ -116,8 +116,8 @@ export default function CourseLearningClient({
 
   // Find next and previous lessons
   const allLessons: { lesson: Lesson; sectionId: string }[] = [];
-  course.sections.forEach((section) => {
-    section.lessons.forEach((lesson) => {
+  course.sections.forEach((section: any) => {
+    section.lessons.forEach((lesson: any) => {
       allLessons.push({ lesson, sectionId: section.id });
     });
   });

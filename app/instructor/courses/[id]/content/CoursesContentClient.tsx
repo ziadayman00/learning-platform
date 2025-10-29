@@ -78,7 +78,7 @@ export default function CourseContentClient({ course }: CourseContentClientProps
         </div>
       ) : (
         <div className="space-y-6">
-          {course.sections.map((section, index) => (
+          {course.sections.map((section: any, index) => (
             <SectionCard
               key={section.id}
               section={section}

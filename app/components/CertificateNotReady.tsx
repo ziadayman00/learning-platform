@@ -86,7 +86,7 @@ export default function CertificateNotReady({
                 Lessons to Complete
               </h3>
               <ul className="space-y-3">
-                {remainingLessons.slice(0, 5).map((lesson, idx) => (
+                {remainingLessons.slice(0, 5).map((lesson: any, idx) => (
                   <li 
                     key={idx}
                     className="flex items-start gap-3 text-sm text-gray-700 bg-gray-50 p-3 rounded-lg"
