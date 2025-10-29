@@ -100,7 +100,7 @@ export default async function InstructorCoursesPage() {
             </div>
           ) : (
             <div className="space-y-6">
-              {courses.map((course) => {
+              {courses.map((course: any) => {
                 const totalLessons = course.sections.reduce(
                   (sum: number, section: any) => sum + section._count.lessons,
                   0
