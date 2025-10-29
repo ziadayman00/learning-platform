@@ -90,7 +90,7 @@ export default async function CertificatePage({ params }: PageProps) {
   }
 
   const completedLessons = allLessons.filter(
-    lesson => lesson.progress[0]?.isCompleted === true
+    (lesson: any) => lesson.progress[0]?.isCompleted === true
   ).length;
 
   const completionPercentage = (completedLessons / totalLessons) * 100;
