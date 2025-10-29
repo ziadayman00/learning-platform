@@ -283,7 +283,7 @@ export default function CourseDetailClient({
   };
 
 const totalLessons = course.sections.reduce(
-  (sum: number, section) => sum + section.lessons.length,
+  (sum: number, section: any) => sum + section.lessons.length,
   0
 );
 

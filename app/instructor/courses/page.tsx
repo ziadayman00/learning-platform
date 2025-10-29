@@ -31,7 +31,6 @@ export default async function InstructorCoursesPage() {
         select: {
           purchases: true, // ✅ Use purchases instead
           sections: true,
-          
         },
       },
       sections: {
@@ -103,7 +102,7 @@ export default async function InstructorCoursesPage() {
             <div className="space-y-6">
               {courses.map((course) => {
                 const totalLessons = course.sections.reduce(
-                  (sum: number, section) => sum + section._count.lessons,
+                  (sum: number, section: any) => sum + section._count.lessons,
                   0
                 );
 
