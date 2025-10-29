@@ -151,7 +151,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
   });
 
   // Calculate average ratings for related courses
-  const relatedCoursesWithRatings = relatedCourses.map((relatedCourse) => {
+  const relatedCoursesWithRatings = relatedCourses.map((relatedCourse: any) => {
     const avgRating =
       relatedCourse.reviews.length > 0
         ? relatedCourse.reviews.reduce((sum: number, review: any) => sum + review.rating, 0) /
