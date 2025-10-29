@@ -96,7 +96,7 @@ export default function LearningCourseSidebar({
         {sections.map((section: any, sectionIndex) => {
           const isOpen = openSections.includes(section.id);
           const completedInSection = section.lessons.filter(
-            (l) => progressMap[l.id]?.isCompleted
+            (l: any) => progressMap[l.id]?.isCompleted
           ).length;
           const totalInSection = section.lessons.length;
           const sectionProgress = totalInSection > 0 
