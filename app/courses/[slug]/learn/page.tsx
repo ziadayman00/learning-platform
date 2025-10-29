@@ -157,7 +157,7 @@ export default async function CourseLearningPage({ params, searchParams }: PageP
     <CourseLearningClient
       course={course}
       currentLesson={currentLesson}
-      currentSectionId={currentSectionId}
+      currentSectionId={currentSectionId ?? ""}
       progressMap={progressMap}
       showEnrollSuccess={enrolled === "true"}
       userReview={userReview}

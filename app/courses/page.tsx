@@ -1,9 +1,12 @@
-// app/courses/page.tsx (Server Component with Streaming)
+// app/courses/page.tsx (Server Component with Dynamic Rendering)
 import { Suspense } from 'react';
 import prisma from "@/lib/prisma";
 import CoursesClient from "./CoursesClient";
 import CoursesHero from "./CoursesHero";
 import CoursesSkeleton from "./CoursesSkeleton";
+
+// Force dynamic rendering - prevents static generation
+export const dynamic = 'force-dynamic';
 
 // This fetches courses (will be streamed)
 async function CoursesList() {

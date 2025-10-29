@@ -60,6 +60,10 @@ type CourseLearningClientProps = {
   currentSectionId: string;
   progressMap: Record<string, { isCompleted: boolean; lastPosition: number }>;
   showEnrollSuccess?: boolean;
+  userReview?: {
+    rating: number;
+    comment: string | null;
+  } | null;
 };
 
 export default function CourseLearningClient({

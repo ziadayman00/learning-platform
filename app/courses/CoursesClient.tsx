@@ -1,12 +1,19 @@
 // app/courses/CoursesClient.tsx (Client Component)
 "use client";
 
-import React, { useState, useEffect, useTransition } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { ArrowRight, Filter, BookOpen, Star, User, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useSearchParams } from 'next/navigation';
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import {
+  ArrowRight,
+  Filter,
+  BookOpen,
+  Star,
+  User,
+  Loader2,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useSearchParams } from "next/navigation";
 
 type Course = {
   id: string;
@@ -48,26 +55,29 @@ export default function CoursesClient({ courses, categories }: CoursesClientProp
 
   // Sync search query from URL params with loading state
   useEffect(() => {
-    const newSearch = searchParams.get('search') || '';
+    const newSearch = searchParams.get("search") || "";
     if (newSearch !== searchQuery) {
       setIsFiltering(true);
       setSearchQuery(newSearch);
-      
+
       // Small delay to show the loading state
       const timer = setTimeout(() => {
         setIsFiltering(false);
       }, 300);
-      
+
       return () => clearTimeout(timer);
     }
-  }, [searchParams]);
+  }, [searchParams, searchQuery]);
 
   // Filter courses based on category and search
-  const filteredCourses = courses.filter(course => {
-    const matchesCategory = selectedCategory === "All" || course.category?.name === selectedCategory;
-    const matchesSearch = 
+  const filteredCourses = courses.filter((course) => {
+    const matchesCategory =
+      selectedCategory === "All" || course.category?.name === selectedCategory;
+
+    const matchesSearch =
       course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.description.toLowerCase().includes(searchQuery.toLowerCase());
+      course.description?.toLowerCase().includes(searchQuery.toLowerCase());
+
     return matchesCategory && matchesSearch;
   });
 
@@ -81,11 +91,10 @@ export default function CoursesClient({ courses, categories }: CoursesClientProp
     "bg-gradient-to-br from-indigo-500 to-blue-600",
   ];
 
-  const categoryOptions = ["All", ...categories.map(cat => cat.name)];
+  const categoryOptions = ["All", ...categories.map((cat) => cat.name)];
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      
       {/* Category Filter */}
       <section className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -97,8 +106,8 @@ export default function CoursesClient({ courses, categories }: CoursesClientProp
                 onClick={() => setSelectedCategory(category)}
                 className={`px-6 py-2 rounded-full font-medium whitespace-nowrap transition-all duration-300 ${
                   selectedCategory === category
-                    ? 'bg-black text-white shadow-lg scale-105'
-                    : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+                    ? "bg-black text-white shadow-lg scale-105"
+                    : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
                 }`}
               >
                 {category}
@@ -114,24 +123,34 @@ export default function CoursesClient({ courses, categories }: CoursesClientProp
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
               <h2 className="text-2xl font-bold">
-                {filteredCourses.length} {filteredCourses.length === 1 ? 'Course' : 'Courses'}
+                {filteredCourses.length}{" "}
+                {filteredCourses.length === 1 ? "Course" : "Courses"}
               </h2>
               {isFiltering && (
                 <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
               )}
             </div>
             <div className="text-sm text-gray-500">
-              Showing {selectedCategory === "All" ? "all categories" : selectedCategory}
+              Showing{" "}
+              {selectedCategory === "All" ? "all categories" : selectedCategory}
             </div>
           </div>
 
           {/* Loading overlay */}
-          <div className={`transition-opacity duration-300 ${isFiltering ? 'opacity-50' : 'opacity-100'}`}>
+          <div
+            className={`transition-opacity duration-300 ${
+              isFiltering ? "opacity-50" : "opacity-100"
+            }`}
+          >
             {filteredCourses.length === 0 ? (
               <div className="text-center py-20">
                 <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">No courses found</h3>
-                <p className="text-gray-600">Try adjusting your filters or search query</p>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                  No courses found
+                </h3>
+                <p className="text-gray-600">
+                  Try adjusting your filters or search query
+                </p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -142,29 +161,33 @@ export default function CoursesClient({ courses, categories }: CoursesClientProp
                     className="group cursor-pointer bg-white rounded-2xl overflow-hidden border-2 border-gray-200 hover:border-black hover:shadow-2xl hover:-translate-y-2 transition-all duration-500"
                   >
                     {/* Thumbnail */}
-<div className="relative h-48 overflow-hidden">
-  {course.thumbnail ? (
-    <Image
-      src={course.thumbnail} // رابط مباشر وصحيح
-      alt={course.title}
-      fill
-      className="object-cover group-hover:scale-110 transition-transform duration-500"
-    />
-  ) : (
-    <div className={`${gradients[index % gradients.length]} w-full h-full`} />
-  )}
-  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-500"></div>
-  {course.category && (
-    <div className="absolute top-4 left-4">
-      <span className="bg-white px-4 py-1 rounded-full text-sm font-medium shadow-lg">
-        {course.category.name}
-      </span>
-    </div>
-  )}
-  <div className="absolute bottom-4 right-4 bg-white rounded-full p-3 shadow-lg group-hover:scale-110 transition-transform duration-300">
-    <BookOpen className="w-5 h-5 text-black" />
-  </div>
-</div>
+                    <div className="relative h-48 overflow-hidden">
+                      {course.thumbnail ? (
+                        <Image
+                          src={course.thumbnail}
+                          alt={course.title}
+                          fill
+                          className="object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div
+                          className={`${
+                            gradients[index % gradients.length]
+                          } w-full h-full`}
+                        />
+                      )}
+                      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-500"></div>
+                      {course.category && (
+                        <div className="absolute top-4 left-4">
+                          <span className="bg-white px-4 py-1 rounded-full text-sm font-medium shadow-lg">
+                            {course.category.name}
+                          </span>
+                        </div>
+                      )}
+                      <div className="absolute bottom-4 right-4 bg-white rounded-full p-3 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                        <BookOpen className="w-5 h-5 text-black" />
+                      </div>
+                    </div>
 
                     {/* Content */}
                     <div className="p-6">
@@ -197,8 +220,12 @@ export default function CoursesClient({ courses, categories }: CoursesClientProp
                         {course.averageRating > 0 ? (
                           <div className="flex items-center gap-1">
                             <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                            <span className="font-medium">{course.averageRating}</span>
-                            <span className="text-gray-400">({course._count.reviews})</span>
+                            <span className="font-medium">
+                              {course.averageRating}
+                            </span>
+                            <span className="text-gray-400">
+                              ({course._count.reviews})
+                            </span>
                           </div>
                         ) : (
                           <div className="flex items-center gap-1 text-gray-400">
@@ -214,7 +241,9 @@ export default function CoursesClient({ courses, categories }: CoursesClientProp
 
                       {/* Price and CTA */}
                       <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                        <div className="text-3xl font-black">${course.price}</div>
+                        <div className="text-3xl font-black">
+                          ${course.price}
+                        </div>
                         <Button className="rounded-full font-medium group/btn">
                           Enroll
                           <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
@@ -236,9 +265,15 @@ export default function CoursesClient({ courses, categories }: CoursesClientProp
             Can't find what you're looking for?
           </h2>
           <p className="text-xl text-gray-400 mb-8">
-            We're constantly adding new courses. Check back soon or become an instructor yourself.
+            We're constantly adding new courses. Check back soon or become an
+            instructor yourself.
           </p>
-          <Button size="lg" variant="outline" className="border-white hover:bg-white text-black rounded-full" asChild>
+          <Button
+            size="lg"
+            variant="outline"
+            className="border-white hover:bg-white text-black rounded-full"
+            asChild
+          >
             <Link href="/become-instructor">
               Become an Instructor
               <ArrowRight className="ml-2 w-5 h-5" />

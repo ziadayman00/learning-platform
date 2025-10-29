@@ -1,7 +1,7 @@
 'use client'
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Sparkles, Zap, Target, Play, BookOpen, Clock, Award, TrendingUp, Users, CheckCircle2 } from "lucide-react";
+import { ArrowRight, Sparkles, Zap, Target, Play, BookOpen, Clock, Award, TrendingUp, Users, CheckCircle2, CheckCircle, PlayCircle } from "lucide-react";
 
 export default function Home() {
   return (
@@ -42,26 +42,25 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Bottom Row - Stats */}
-          <div className="border-t border-gray-200 py-6 sm:py-8 grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
-            <div>
-              <div className="text-3xl sm:text-4xl font-bold mb-1">500+</div>
-              <div className="text-xs sm:text-sm text-gray-500 uppercase tracking-wider">Courses</div>
-            </div>
-            <div>
-              <div className="text-3xl sm:text-4xl font-bold mb-1">50K+</div>
-              <div className="text-xs sm:text-sm text-gray-500 uppercase tracking-wider">Students</div>
-            </div>
-            <div>
-              <div className="text-3xl sm:text-4xl font-bold mb-1">100+</div>
-              <div className="text-xs sm:text-sm text-gray-500 uppercase tracking-wider">Instructors</div>
-            </div>
-            <div>
-              <div className="text-3xl sm:text-4xl font-bold mb-1">4.8/5</div>
-              <div className="text-xs sm:text-sm text-gray-500 uppercase tracking-wider">Rating</div>
-            </div>
-          </div>
-        </div>
+{/* Bottom Row - Trust Badges */}
+<div className="border-t border-gray-200 py-6 sm:py-8 flex flex-wrap items-center gap-8 sm:gap-12">
+  <div className="flex items-center gap-2">
+    <CheckCircle className="w-5 h-5 text-black" />
+    <span className="text-sm text-gray-600">Lifetime Access</span>
+  </div>
+  <div className="flex items-center gap-2">
+    <Award className="w-5 h-5 text-black" />
+    <span className="text-sm text-gray-600">Certificates</span>
+  </div>
+  <div className="flex items-center gap-2">
+    <Users className="w-5 h-5 text-black" />
+    <span className="text-sm text-gray-600">Expert Instructors</span>
+  </div>
+  <div className="flex items-center gap-2">
+    <PlayCircle className="w-5 h-5 text-black" />
+    <span className="text-sm text-gray-600">HD Video Quality</span>
+  </div>
+</div>        </div>
       </section>
 
       {/* Animated Categories Strip */}
@@ -304,7 +303,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center">
             <Link 
               href="/courses"
-              className="inline-flex items-center gap-2 sm:gap-3 bg-white text-black px-8 sm:px-10 py-4 sm:py-5 rounded-full text-lg sm:text-xl font-black hover:bg-gray-100 hover:scale-110 hover:shadow-2xl transition-all duration-500 group w-full sm:w-auto justify-center"
+              className="inline-flex items-center gap-2 sm:gap-3 bg-white text-black px-8 sm:px-10 py-4 sm:py-5 rounded-full text-lg sm:text-xl font-black hover:bg-gray-100 hover:shadow-2xl transition-all duration-500 group w-full sm:w-auto justify-center"
             >
               Browse All Courses
               <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 group-hover:translate-x-2 transition-transform" />

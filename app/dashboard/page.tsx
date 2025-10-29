@@ -58,7 +58,6 @@ export default async function DashboardPage() {
     },
   });
 
-  // Transform purchases to include lesson count and completed lessons
   const purchasesWithProgress = await Promise.all(
     purchases.map(async (purchase) => {
       const totalLessons = purchase.course.sections.reduce(
@@ -99,8 +98,18 @@ export default async function DashboardPage() {
     })
   );
 
-  // If user is an instructor, fetch their courses
-  let instructorCourses = [];
+  // ✅ Define a custom type for instructorCourses (because it's not a plain Prisma Course)
+  type InstructorCourse = Awaited<ReturnType<typeof prisma.course.findFirst>> & {
+    _count: {
+      purchases: number;
+      reviews: number;
+    };
+    category: {
+      name: string;
+    } | null;
+  };
+
+  let instructorCourses: InstructorCourse[] = [];
   if (user.role === 'INSTRUCTOR' || user.role === 'ADMIN') {
     instructorCourses = await prisma.course.findMany({
       where: {
@@ -125,13 +134,23 @@ export default async function DashboardPage() {
     });
   }
 
-  // Calculate instructor stats
-  const instructorStats = user.role === 'INSTRUCTOR' || user.role === 'ADMIN' ? {
-    totalCourses: instructorCourses.length,
-    publishedCourses: instructorCourses.filter(c => c.isPublished).length,
-    totalStudents: instructorCourses.reduce((sum, course) => sum + course._count.purchases, 0),
-    totalRevenue: instructorCourses.reduce((sum, course) => sum + (course.price * course._count.purchases), 0),
-  } : null;
+  const instructorStats =
+    user.role === 'INSTRUCTOR' || user.role === 'ADMIN'
+      ? {
+          totalCourses: instructorCourses.length,
+          publishedCourses: instructorCourses.filter(
+            (c) => c.isPublished
+          ).length,
+          totalStudents: instructorCourses.reduce(
+            (sum, course) => sum + course._count.purchases,
+            0
+          ),
+          totalRevenue: instructorCourses.reduce(
+            (sum, course) => sum + course.price * course._count.purchases,
+            0
+          ),
+        }
+      : null;
 
   return (
     <DashboardClient
@@ -140,7 +159,7 @@ export default async function DashboardPage() {
         name: user.name || '',
         email: user.email || '',
         image: user.image || null,
-        role: user.role,
+        role: user.role || 'user',
       }}
       purchases={purchasesWithProgress}
       instructorCourses={instructorCourses}

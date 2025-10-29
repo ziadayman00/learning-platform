@@ -4,7 +4,6 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import prisma from '@/lib/prisma';
 import CertificateClient from './CertificateClient';
-import CertificateNotReady from '@/components/CertificateNotReady';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
