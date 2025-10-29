@@ -37,7 +37,7 @@ export default function LearningCourseSidebar({
 }: LearningCourseSidebarProps) {
   // Find current section and open it by default
   const currentSection = sections.find(s => 
-    s.lessons.some(l => l.id === currentLessonId)
+    s.lessons.some((l: any) => l.id === currentLessonId)
   );
   
   const [openSections, setOpenSections] = useState<string[]>(
@@ -62,7 +62,7 @@ export default function LearningCourseSidebar({
   // Calculate total progress
   const totalLessons = sections.reduce((sum: number, s) => sum + s.lessons.length, 0);
   const completedLessons = sections.reduce(
-    (sum: number, s) => sum + s.lessons.filter(l => progressMap[l.id]?.isCompleted).length,
+    (sum: number, s) => sum + s.lessons.filter((l: any) => progressMap[l.id]?.isCompleted).length,
     0
   );
 

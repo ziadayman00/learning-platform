@@ -81,7 +81,7 @@ export default async function CertificatePage({ params }: PageProps) {
   }
 
   // 4. Calculate completion
-  const allLessons = course.sections.flatMap(s => s.lessons);
+  const allLessons = course.sections.flatMap((s: any) => s.lessons);
   const totalLessons = allLessons.length;
   
   if (totalLessons === 0) {
