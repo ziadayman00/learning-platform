@@ -60,9 +60,9 @@ export default function LearningCourseSidebar({
   };
 
   // Calculate total progress
-  const totalLessons = sections.reduce((sum, s) => sum + s.lessons.length, 0);
+  const totalLessons = sections.reduce((sum: number, s) => sum + s.lessons.length, 0);
   const completedLessons = sections.reduce(
-    (sum, s) => sum + s.lessons.filter(l => progressMap[l.id]?.isCompleted).length,
+    (sum: number, s) => sum + s.lessons.filter(l => progressMap[l.id]?.isCompleted).length,
     0
   );
 

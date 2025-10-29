@@ -107,7 +107,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
   // Calculate average rating
   const avgRating =
     course.reviews.length > 0
-      ? course.reviews.reduce((sum, review) => sum + review.rating, 0) /
+      ? course.reviews.reduce((sum: number, review) => sum + review.rating, 0) /
         course.reviews.length
       : 0;
 
@@ -154,7 +154,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
   const relatedCoursesWithRatings = relatedCourses.map((relatedCourse) => {
     const avgRating =
       relatedCourse.reviews.length > 0
-        ? relatedCourse.reviews.reduce((sum, review) => sum + review.rating, 0) /
+        ? relatedCourse.reviews.reduce((sum: number, review) => sum + review.rating, 0) /
           relatedCourse.reviews.length
         : 0;
 

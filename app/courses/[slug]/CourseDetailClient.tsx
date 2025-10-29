@@ -282,14 +282,15 @@ export default function CourseDetailClient({
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const totalLessons = course.sections.reduce(
-    (sum, section) => sum + section.lessons.length,
-    0
-  );
-  const freeLessons = course.sections.reduce(
-    (sum, section) => sum + section.lessons.filter((l) => l.isFree).length,
-    0
-  );
+const totalLessons = course.sections.reduce(
+  (sum: number, section) => sum + section.lessons.length,
+  0
+);
+
+const freeLessons = course.sections.reduce(
+  (sum: number, section) => sum + section.lessons.filter((l) => l.isFree).length,
+  0
+);
 
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString("en-US", {

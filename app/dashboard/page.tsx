@@ -61,7 +61,7 @@ export default async function DashboardPage() {
   const purchasesWithProgress = await Promise.all(
     purchases.map(async (purchase) => {
       const totalLessons = purchase.course.sections.reduce(
-        (sum, section) => sum + section.lessons.length,
+        (sum: number, section) => sum + section.lessons.length,
         0
       );
 
@@ -142,11 +142,11 @@ export default async function DashboardPage() {
             (c) => c.isPublished
           ).length,
           totalStudents: instructorCourses.reduce(
-            (sum, course) => sum + course._count.purchases,
+            (sum: number, course) => sum + course._count.purchases,
             0
           ),
           totalRevenue: instructorCourses.reduce(
-            (sum, course) => sum + course.price * course._count.purchases,
+            (sum: number, course) => sum + course.price * course._count.purchases,
             0
           ),
         }

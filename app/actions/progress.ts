@@ -136,7 +136,7 @@ export async function getCourseProgress(courseId: string) {
     }
 
     const totalLessons = course.sections.reduce(
-      (sum, section) => sum + section.lessons.length,
+      (sum: number, section) => sum + section.lessons.length,
       0
     );
 

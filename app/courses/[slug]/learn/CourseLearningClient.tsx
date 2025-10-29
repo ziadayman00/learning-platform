@@ -105,7 +105,7 @@ export default function CourseLearningClient({
 
   // Calculate progress
   const totalLessons = course.sections.reduce(
-    (sum, s) => sum + s.lessons.length,
+    (sum: number, s) => sum + s.lessons.length,
     0
   );
   const completedLessons = Object.values(progressMap).filter(

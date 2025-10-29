@@ -46,7 +46,7 @@ export default function CourseContentClient({ course }: CourseContentClientProps
           <h2 className="text-3xl font-bold">Course Curriculum</h2>
           <p className="text-gray-600 mt-2">
             {course.sections.length} {course.sections.length === 1 ? 'section' : 'sections'} • {' '}
-            {course.sections.reduce((total, section) => total + section.lessons.length, 0)} lessons
+            {course.sections.reduce((total: number, section) => total + section.lessons.length, 0)} lessons
           </p>
         </div>
         <Button

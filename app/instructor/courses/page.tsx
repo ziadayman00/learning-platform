@@ -103,7 +103,7 @@ export default async function InstructorCoursesPage() {
             <div className="space-y-6">
               {courses.map((course) => {
                 const totalLessons = course.sections.reduce(
-                  (sum, section) => sum + section._count.lessons,
+                  (sum: number, section) => sum + section._count.lessons,
                   0
                 );
 
