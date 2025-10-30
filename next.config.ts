@@ -12,7 +12,6 @@ const nextConfig: NextConfig = {
   },
   serverExternalPackages: ['@prisma/client', '@prisma/engines'],
   turbopack: {},
-  outputFileTracing: true,
 };
 
 export default nextConfig;
