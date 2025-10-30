@@ -37,7 +37,7 @@ export default async function CreateCoursePage() {
     <div className="flex flex-col min-h-screen bg-white">
       {/* Hero Section */}
       <section className="relative bg-white border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-sm uppercase tracking-widest text-gray-500 mb-4">
             Instructor Dashboard
           </div>
