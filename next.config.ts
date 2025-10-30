@@ -1,4 +1,5 @@
 import { NextConfig } from 'next';
+import path from 'path';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -10,10 +11,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Updated for Next.js 16
   serverExternalPackages: ['@prisma/client', '@prisma/engines'],
-  // Add empty turbopack config to suppress warning
   turbopack: {},
+  // Force include Prisma engine binaries in serverless functions
+  experimental: {
+    outputFileTracingIncludes: {
+      '/api/**/*': ['./node_modules/.prisma/client/**/*'],
+      '/**': ['./node_modules/.prisma/client/**/*'],
+    },
+  },
 };
 
 export default nextConfig;
