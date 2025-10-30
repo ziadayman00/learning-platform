@@ -1,5 +1,4 @@
 import { NextConfig } from 'next';
-import path from 'path';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -13,13 +12,7 @@ const nextConfig: NextConfig = {
   },
   serverExternalPackages: ['@prisma/client', '@prisma/engines'],
   turbopack: {},
-  // Force include Prisma engine binaries in serverless functions
-  experimental: {
-    outputFileTracingIncludes: {
-      '/api/**/*': ['./node_modules/.prisma/client/**/*'],
-      '/**': ['./node_modules/.prisma/client/**/*'],
-    },
-  },
+  outputFileTracing: true,
 };
 
 export default nextConfig;
