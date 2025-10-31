@@ -1,12 +1,16 @@
 import { PrismaClient } from '@prisma/client'
-import { PrismaNeon } from '@prisma/adapter-neon'
-import { Pool } from '@neondatabase/serverless'
 
 const prismaClientSingleton = () => {
-  const connectionString = process.env.DATABASE_URL!
-  const pool = new Pool({ connectionString })
-  const adapter = new PrismaNeon(pool as any)
-  return new PrismaClient({ adapter })
+  // Check if we're using Accelerate URL (starts with prisma://)
+  const databaseUrl = process.env.DATABASE_URL || ''
+  
+  if (databaseUrl.startsWith('prisma://')) {
+    // Using Accelerate - no adapter needed
+    return new PrismaClient()
+  } else {
+    // Using direct connection - works locally and on Vercel
+    return new PrismaClient()
+  }
 }
 
 declare global {
