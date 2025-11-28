@@ -10,6 +10,7 @@ import { Select } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { createCourse, updateCourse } from '@/app/actions/courses';
 import { Loader2, Save, Eye } from 'lucide-react';
+import ImageUpload from '../course-content/ImageUpload';
 
 type Category = {
   id: string;
@@ -39,6 +40,7 @@ export default function CourseForm({ categories, mode, course }: CourseFormProps
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [thumbnail, setThumbnail] = useState<string | null>(course?.thumbnail || null);
 
   const handleAction = async (shouldPublish: boolean) => {
     if (!formRef.current) return;
@@ -48,6 +50,9 @@ export default function CourseForm({ categories, mode, course }: CourseFormProps
 
     const formData = new FormData(formRef.current);
     formData.set('isPublished', shouldPublish.toString());
+    if (thumbnail) {
+      formData.set('thumbnail', thumbnail);
+    }
 
     startTransition(async () => {
       let result;
@@ -154,19 +159,22 @@ export default function CourseForm({ categories, mode, course }: CourseFormProps
           </div>
         </div>
 
-        {/* Thumbnail URL */}
+        {/* Thumbnail Upload */}
         <div>
-          <Label htmlFor="thumbnail">Thumbnail URL (Optional)</Label>
-          <Input
-            id="thumbnail"
-            name="thumbnail"
-            type="url"
-            placeholder="https://example.com/image.jpg"
-            defaultValue={course?.thumbnail || ''}
+          <Label className="mb-2 block">Course Thumbnail</Label>
+          <ImageUpload
+            value={thumbnail}
+            onChange={(url) => setThumbnail(url)}
+            onRemove={() => setThumbnail(null)}
             disabled={isPending}
           />
+          <input 
+            type="hidden" 
+            name="thumbnail" 
+            value={thumbnail || ''} 
+          />
           <p className="text-sm text-gray-500 mt-2">
-            Paste a URL to an image for your course thumbnail
+            Upload a high-quality image to attract students (16:9 ratio recommended)
           </p>
         </div>
 

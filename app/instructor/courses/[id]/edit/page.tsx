@@ -5,6 +5,7 @@ import { headers } from 'next/headers';
 import prisma from '@/lib/prisma';
 import DeleteCourseButton from '@/app/components/forms/DeleteCourseButton';
 import CourseForm from '@/app/components/forms/CourseForm';
+import InstructorCourseNav from '@/app/components/instructor/InstructorCourseNav';
 
 type PageProps = {
   params: Promise<{
@@ -105,6 +106,7 @@ export default async function EditCoursePage({ params }: PageProps) {
       {/* Form Section */}
       <section className="py-16 bg-gray-50 flex-grow">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <InstructorCourseNav courseId={course.id} />
           <CourseForm
             categories={categories} 
             mode="edit"

@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 
 import { ChevronDown, ChevronUp } from "lucide-react";
 import EnrollButton from "@/app/components/checkout/EnrollButton";
+import VideoPlayerModal from "@/app/components/course-content/VideoPlayerModal";
 
 type Review = {
   id: string;
@@ -37,6 +38,7 @@ type Lesson = {
   id: string;
   title: string;
   description: string | null;
+  videoUrl: string;
   duration: number | null;
   isFree: boolean;
   position: number;
@@ -112,9 +114,11 @@ type CourseDetailClientProps = {
 function CurriculumSections({
   sections,
   formatDuration,
+  onPlayLesson,
 }: {
   sections: any[];
   formatDuration: (seconds: number | null) => string;
+  onPlayLesson: (lesson: any) => void;
 }) {
   const [openSections, setOpenSections] = useState<string[]>([sections[0]?.id]); // First section open by default
 
@@ -180,7 +184,14 @@ function CurriculumSections({
                   section.lessons.map((lesson: any) => (
                     <div
                       key={lesson.id}
-                      className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 transition-colors"
+                      onClick={() => {
+                        if (lesson.isFree) {
+                          onPlayLesson(lesson);
+                        }
+                      }}
+                      className={`flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 transition-colors ${
+                        lesson.isFree ? 'cursor-pointer' : ''
+                      }`}
                     >
                       <div className="bg-white rounded-full p-2 border-2 border-gray-200">
                         <Play
@@ -231,6 +242,13 @@ export default function CourseDetailClient({
   const [activeTab, setActiveTab] = useState<
     "overview" | "curriculum" | "reviews"
   >("overview");
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState<{ url: string; title: string } | null>(null);
+
+  // Get first free lesson
+  const firstFreeLesson = course.sections
+    .flatMap(section => section.lessons)
+    .find(lesson => lesson.isFree);
 
   const gradients = [
     "bg-gradient-to-br from-blue-500 to-purple-600",
@@ -411,13 +429,27 @@ const freeLessons = course.sections.reduce(
                   ) : (
                     <div className="bg-gradient-to-br from-blue-500 to-purple-600 w-full h-full" />
                   )}
-                  <div className="absolute inset-0 bg-black/40 hover:bg-black/20 transition-colors duration-300 flex items-center justify-center group cursor-pointer">
-                    <div className="bg-white rounded-full p-6 shadow-2xl group-hover:scale-110 transition-transform duration-300">
-                      <Play className="w-12 h-12 text-black" />
+                  {firstFreeLesson ? (
+                    <div 
+                      onClick={() => {
+                        setSelectedVideo({ url: firstFreeLesson.videoUrl, title: firstFreeLesson.title });
+                        setVideoModalOpen(true);
+                      }}
+                      className="absolute inset-0 bg-black/40 hover:bg-black/20 transition-colors duration-300 flex items-center justify-center group cursor-pointer"
+                    >
+                      <div className="bg-white rounded-full p-6 shadow-2xl group-hover:scale-110 transition-transform duration-300">
+                        <Play className="w-12 h-12 text-black" />
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                      <div className="bg-white rounded-full p-6 shadow-2xl opacity-50">
+                        <Play className="w-12 h-12 text-black" />
+                      </div>
+                    </div>
+                  )}
                   <div className="absolute bottom-4 left-4 bg-black/70 backdrop-blur-sm px-4 py-2 rounded-full text-white text-sm font-medium">
-                    Preview Course
+                    {firstFreeLesson ? 'Watch Free Preview' : 'No Preview Available'}
                   </div>
                 </div>
                 <div className="p-8 text-black">
@@ -570,6 +602,11 @@ const freeLessons = course.sections.reduce(
                     <CurriculumSections
                       sections={course.sections}
                       formatDuration={formatDuration}
+                      onPlayLesson={(lesson) => {
+                        console.log("Playing lesson:", lesson);
+                        setSelectedVideo({ url: lesson.videoUrl, title: lesson.title });
+                        setVideoModalOpen(true);
+                      }}
                     />
                   )}
                 </div>
@@ -791,6 +828,18 @@ const freeLessons = course.sections.reduce(
           </Link>
         </div>
       </section>
+
+      {/* Video Player Modal */}
+      {selectedVideo && (
+        <VideoPlayerModal
+          isOpen={videoModalOpen}
+          onClose={() => {
+            setVideoModalOpen(false);
+          }}
+          videoUrl={selectedVideo.url}
+          title={selectedVideo.title}
+        />
+      )}
 
       <style jsx>{`
         .line-clamp-2 {
